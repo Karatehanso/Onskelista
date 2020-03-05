@@ -1,0 +1,112 @@
+@model olist.Models.WishList
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>WishList</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Deadline)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Deadline)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Category)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Category)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Privacy)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Privacy)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
+<div id="app" v-cloak>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tr v-for="(product, index) in products">
+            <td class="productName">{{ product.name }}</td>
+            <td class="productPrice">{{ product.price }}</td>
+            <td class="ProductDescription">{{ product.description }}</td>
+            <td><button class="Remove" v-on:click="delProduct(product.id, index)">Remove</button></td>
+        </tr>
+    </table>
+</div>
+
+
+
+@section Scripts
+{   
+    <script src="https://unpkg.com/axios/dist/axios.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    products: [],
+                    message: "Products",
+                    product: {
+                        name: '',
+                        price: '',
+                        description: ''
+                    }
+                },
+                created: function() {
+                    var self = this;
+                    axios.get('/api/Products/get?WishListId=' + @Model.Id).then(function(response) {
+                        self.products = response.data;
+                    });
+                },
+                methods: {
+                    addWishList: function() {
+                        var self = this;
+
+                        axios.post('/api/Products/', self.wishList).then(function(response) {
+                            self.wishLists.push(response.data);
+                        });
+                    },
+                    delWishList: function(id, index) {
+                        var self = this;
+
+                        axios.delete('/api/Products/' + id)
+                            .then(function(response) {
+                                self.wishLists.splice(index, 1);
+                            });
+                    }
+                }
+            });
+        });
+
+    </script>
+}

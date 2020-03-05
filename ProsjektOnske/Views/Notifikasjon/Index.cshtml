@@ -1,0 +1,138 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class=«profiltabber»>
+    <nav class="nav nav-tabs">
+      
+        <a asp-area="" asp-controller="Profile" asp-action="Index" class="nav-item nav-link">
+            <i class="fa fa-user"></i> Hjem
+        </a>
+      
+        <a asp-area="" asp-controller="Friendship" asp-action="Index" class="nav-item nav-link">
+            <i class="fa fa-users"></i> Venner
+        </a>
+
+        <a asp-area="" asp-controller="Notifikasjon" asp-action="Index" class="nav-item nav-link active">
+            <i class="fa fa-bell"></i> Varslinger
+        </a>
+      
+        <a href="#" class="nav-item nav-link disabled" tabindex="-1">
+            <i class="fas fa-shopping-basket"></i>Handlekurv[X]
+        </a>
+      
+    </nav>
+</div>
+
+<div class = " jumbotron" id="jumboron1">
+<div>
+    <button style="margin: auto; display: block" class="btn primary">
+        <a class="btn btn-secondary" id="knnap2" asp-area="" asp-controller="Friendship" asp-action="SearchFriend">Søke etter venner</a>
+    </button>
+</div>
+    <br></br>
+<div id="app" v-cloak xmlns:v-on="http://www.w3.org/1999/xhtml">
+    
+    <h3>{{ pendingFriend.nickname }}</h3>
+    
+
+    <br/><br/>
+    <h3 id="textCenter">{{ message }}</h3>
+    <br/>
+    <br></br>
+    <table id="textCenter" class="table table-striped">
+        <thead>
+        <tr>
+            <th>Fornavn</th>
+            <th>Etternavn</th>
+            <th>Fødselsdato</th>
+            <th>Godkjenn venneforespørsel</th>
+            <th>Avslå venneforespørsel</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tr v-for="(pendingFriend, index) in pendingFriends">
+
+            <td class="nickname">{{ pendingFriend.firstName }} </td>
+<td class="nickname">{{ pendingFriend.lastName }} </td>
+            <td class="Birthday">{{ getVarDate(pendingFriend.bursdag) }} </td>
+            <td><button class="btn btn-info" v-on:click="addFriend(pendingFriend.id, index)">Godkjenn</button></td>
+            <td><button class="btn btn-info"id="knnap1" v-on:click="delFriend(pendingFriend.id, index)">Fjern</button>
+
+
+        </tr>
+    </table>
+</div>
+</div>
+
+@section Scripts
+{
+    <script src="https://unpkg.com/axios/dist/axios.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+    
+    <script>
+
+        $(document).ready(function() {
+            
+            var app = new Vue({
+                el: '#app',
+               
+                data: {
+                    pendingFriends: [],
+                    message: "Venneforespørsler",
+                    pendingFriend: {
+
+                        nickname: '',
+                        bursdag: ''
+                       
+                    }
+                },
+   
+                created: function() {
+                    var self = this;
+
+                    axios.get('/api/Pendos').then(function(response) {
+                        self.pendingFriends = response.data;
+                    });
+                },
+                methods: {
+                    
+                      addFriend: function(id, index) {
+                         var self = this;
+                                     
+                         axios.post('/api/Pendos/'+ id)
+                          .then(function(response) {
+                             self.pendingFriends.splice(index, 1);
+                           });
+           
+                    },
+                         
+                    delFriend: function(id, index) {
+                        var self = this;
+
+                        axios.delete('/api/Pendos/' + id)
+                            .then(function(response) {
+                                self.pendingFriends.splice(index, 1);
+                            });
+                    },
+                    
+                    
+                      getVarDate: function(birthDate){
+                          
+                          birthDate = new Date(birthDate);
+                          hoursDiff = birthDate.getHours() - birthDate.getTimezoneOffset() / 60;
+                          minutesDiff = (birthDate.getHours() - birthDate.getTimezoneOffset()) % 60;
+                          birthDate.setHours(hoursDiff);
+                          birthDate.setMinutes(minutesDiff);
+                           
+                          var date = new Date(birthDate).toJSON().slice(0,10).replace(/-/g,'/')
+                          return date
+                      } 
+                }
+                    
+            });
+        });
+
+    </script>
+}

@@ -1,0 +1,108 @@
+
+@model olist.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Friend";
+}
+
+<div class=«vennetabber»>
+    <nav class="nav nav-tabs">
+      
+        <a asp-area="" asp-controller="Profile" asp-action="Index" class="nav-item nav-link">
+            <i class="fa fa-user"></i> Hjem
+        </a>
+    
+        <a asp-area="" asp-controller="Friendship" asp-action="Index" class="nav-item nav-link active">
+            <i class="fa fa-users"></i> Venner
+        </a>
+       
+        <a asp-area="" asp-controller="Notifikasjon" asp-action="Index" class="nav-item nav-link">
+            <i class="fa fa-bell"></i> Varslinger
+        </a>
+      
+        <a href="#" class="nav-item nav-link disabled" tabindex="-1">
+            <i class="fas fa-shopping-basket"></i>Handlekurv[X]
+        </a>
+      
+    </nav>
+</div>
+
+
+<div class = " jumbotron" id="jumboron1">
+
+<div id="app" v-cloak>
+
+    
+    <img id="profilbilde" class="rounded-circle" src="@Model.ProfilePicture" alt="Cinque Terre"/>
+    <h2 id="textCenter">@Model.FirstName @Model.LastName</h2>
+    <br>
+    <br></br>
+   
+    <h3 id="textCenter">@Model.FirstName sine Ønskelister</h3>
+
+    <table id="textCenter" class="table table-hover">
+        <thead>
+        <tr>
+            <th>Tittel</th>
+            <th>Frist</th>
+            <th>Kategori</th>
+        </tr>
+        </thead>
+        <tr v-for="(wishList, index) in wishLists" v-on:click="visitWishList(wishList.id)">
+            <td class="WishListTitle">{{ wishList.title }}</td>
+            <td class="WishListDeadline">{{ getVarDate(wishList.deadline) }}</td>
+            <td class="WishListCategory">{{ wishList.category }}</td>
+        </tr>
+    </table>
+</div>
+
+</div>
+
+@section Scripts
+{
+    <script src="https://unpkg.com/axios/dist/axios.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    wishLists: [],
+                    wishList: {
+                        title: '',
+                        deadline: '',
+                        category: ''
+                    }
+                },
+                created: function() {
+                    var self = this;
+                    axios.get('/api/WishLists/@Model.Id').then(function(response) {
+                        self.wishLists = response.data;
+                    });
+                },
+                methods: {
+                    visitWishList: function(id) {
+
+                        window.location.href = '/Product/FriendProd/' + id;
+                    },
+                    
+                    getVarDate: function(birthDate) {
+                        birthDate = new Date(birthDate);
+                        hoursDiff = birthDate.getHours() - birthDate.getTimezoneOffset() / 60;
+                        minutesDiff = (birthDate.getHours() - birthDate.getTimezoneOffset()) % 60;
+                        birthDate.setHours(hoursDiff);
+                        birthDate.setMinutes(minutesDiff);
+                        var date = new Date(birthDate).toJSON().slice(0, 10).replace(/-/g, '/');
+                        return date;
+
+                    }
+                    
+                }
+                
+
+            });
+        });
+
+    </script>
+}

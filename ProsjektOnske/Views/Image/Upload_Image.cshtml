@@ -1,0 +1,27 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Upload Image";
+}
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+}
+
+
+
+<div class="text-center">
+    <h2>Welcome @user.FirstName @user.LastName!</h2>
+    <img src="@user.ProfilePicture"/>
+    
+    <form asp-controller="Image" asp-action="Upload_Image" method="post"enctype="multipart/form-data">
+        <input type="file" name="file" accept=".png,.jpg"/>
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <br />
+
+    <label>Uploaded File to @ViewData["FilePath"]</label>
+</div>

@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewData["Title"] = "Email";
+}
+
+<div class = " jumbotron" id="jumboron1">
+
+<h1 id="textCenter">Kontakt oss!</h1>
+
+
+@using (Html.BeginForm("SendMail", "Email"))
+{
+    <div id="textCenter">
+        <textarea name ="msg" type="text" ></textarea>
+        <br>
+        <br>
+
+        <button type="submit" class="btn btn-secondary" id="knnap2">Send inn</button>
+    </div>
+                                                                                                             
+}
+</div>

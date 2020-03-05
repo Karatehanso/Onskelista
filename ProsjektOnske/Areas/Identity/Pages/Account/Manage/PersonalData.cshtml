@@ -1,0 +1,24 @@
+﻿@page
+@model PersonalDataModel
+@{
+    ViewData["Title"] = "Personlig Data";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+<h4>@ViewData["Title"]</h4>
+
+<div class="row">
+    <div class="col-md-6">
+        <p>Din brukerkonto inneholder personlig data som du har delt med oss. Denne siden lar deg slette disse dataene.</p>
+        <p>
+            <strong>Hvis du sletter disse dataene, fjernes kontoen din permanent, og kontoen kan ikke gjenopprettes.</strong>
+        </p>
+        <p>
+            <a id="delete" asp-page="DeletePersonalData" class="btn btn-primary">Slett Brukerkonto</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

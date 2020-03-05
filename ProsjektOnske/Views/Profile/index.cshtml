@@ -1,0 +1,317 @@
+
+@model olist.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+    
+<div class=«profiltabber»>
+    <nav class="nav nav-tabs">
+      
+        <a asp-area="" asp-controller="Profile" asp-action="Index" class="nav-item nav-link active">
+            <i class="fa fa-user"></i> Hjem
+        </a>
+      
+        <a asp-area="" asp-controller="Friendship" asp-action="Index" class="nav-item nav-link">
+            <i class="fa fa-users"></i> Venner
+        </a>
+
+        <a asp-area="" asp-controller="Notifikasjon" asp-action="Index" class="nav-item nav-link">
+            <i class="fa fa-bell"></i> Varslinger
+        </a>
+      
+        <a href="#" class="nav-item nav-link disabled" tabindex="-1">
+            <i class="fas fa-shopping-basket"></i>Handlekurv[X]
+        </a>
+      
+    </nav>
+</div>
+
+
+<div class = " jumbotron" id="jumboron1">
+
+
+    <div id="app" v-cloak>
+    
+        <img id="profilbilde" class="rounded-circle" src="@Model.ProfilePicture" alt="Cinque Terre"/>
+   
+    
+        <h2 id="textCenter">@Model.FirstName @Model.LastName</h2>
+        <br>
+        <br>
+        <h3 id="textCenter">{{ message }}</h3>
+  
+        <table id="textCenter" class="table table-hover">
+            <thead>
+            <tr>
+                <th>Tittel</th>
+                <th>Frist</th>
+                <th>Kategori</th>
+                <th>Deles med</th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tr v-for="(wishList, index) in wishLists" v-bind:id="`list${wishList.id}`">
+                <td class="WishListTitle">
+                    <div class="view" v-on:click="visitWishList(wishList.id)">{{ wishList.title }}</div>
+                    <div class="edit" style="display: none">
+                        <input type="text" id="Title" v-model="wishList.title"/>
+                    </div>
+                </td>
+                <td class="WishListDeadline">
+                    <div class="view" v-on:click="visitWishList(wishList.id)">{{ getVarDate(wishList.deadline) }}</div>
+                    <div class="edit" style="display: none">
+                        <input type="datetime-local" id="Deadline" v-model="wishList.deadline"/>
+                    </div>
+                </td>
+                <td class="WishListCategory">
+                    <div class="view" v-on:click="visitWishList(wishList.id)">{{ wishList.category }}</div>
+                    <div class="edit" style="display: none">
+                        <select id="Category" v-bind:value="wishList.category" v-model="wishList.category">
+                            <option value="" disabled selected>Kategori</option>
+                            <option value="Bursdag">Bursdag</option>
+                            <option value="Bryllup">Bryllup</option>
+                            <option value="Jul">Jul</option>
+                            <option value="--">Annet</option>
+                        </select>
+                    </div>
+                </td>
+                <td class="WishListPrivacy">
+                    <div class="view" v-on:click="visitWishList(wishList.id)">{{ wishList.privacy }}</div>
+                    <div class="edit" style="display: none">
+                        <select id="Privacy" v-bind:value="wishList.privacy" v-model="wishList.privacy">
+                            <option value="" disabled selected>Deles med</option>
+                            <option value="Alle">Alle</option>
+                            <option value="Venner">Venner</option>
+                            <option value="Ingen">Ingen</option>
+                        </select>
+                    </div>
+                </td>
+                <td class="WishListButton1">
+                    <div class="view">
+                        <button class="btn btn-info" v-on:click="editWishList(wishList.id, index)">Endre</button>
+                    </div>
+                    <div class="edit" style="display: none">
+                        <button class="btn btn-info" v-on:click="updateWishList(wishList.id, index)">Ok</button>
+                    </div>
+                </td>
+                <td class="WishListButton2">
+                    <button class="btn btn-info" id="knnap1" v-on:click="delWishList(wishList.id, index)">Fjern</button>
+                </td>
+            </tr>
+            <tr>
+                <td class="inputHide" colspan="6" style="text-align: center">
+                    <button class="btn btn-info" v-on:click="viewAdd()">Legg til Ønskeliste</button>
+                </td>
+            </tr>
+            <tr class="inputView" style="display: none">
+                <td><input type="text" id="Title" placeholder="Tittel" v-model="wishList.title"/></td>
+                <td><input type="date" id="Deadline" placeholder="Frist" v-model="wishList.deadline"/></td>
+                <td>
+                    <select id="Category" v-model="wishList.category">
+                        <option value="" disabled selected>Kategori</option>
+                        <option value="Bursdag">Bursdag</option>
+                        <option value="Bryllup">Bryllup</option>
+                        <option value="Jul">Jul</option>
+                        <option value="--">Annet</option>
+                    </select>
+                </td>
+                <td>
+                    <select id="Privacy" v-model="wishList.privacy">
+                        <option value="" disabled selected>Deles med</option>
+                        <option value="Alle">Alle</option>
+                        <option value="Venner">Venner</option>
+                        <option value="Ingen">Ingen</option>
+                    </select>
+                </td>
+                <td><button class="btn btn-info" v-on:click="addWishList">Legg til</button></td>
+                <td><button id="knnap1" class="btn btn-info" v-on:click="cancelAdd">Avbryt</button></td>
+            </tr>
+        </table>
+    </div>
+
+
+
+</div>
+@section Scripts
+{
+    <script src="https://unpkg.com/axios/dist/axios.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    wishLists: [],
+                    message: "Mine Ønskelister",
+                    wishList: {
+                        title: '',
+                        deadline: '',
+                        category: '',
+                        privacy: '',
+                        ownerId: '@Model.Id'
+                    }
+                },
+                created: function() {
+                    var self = this;
+                    axios.get('/api/WishLists/@Model.Id').then(function(response) {
+                        self.wishLists = response.data;
+                    });
+                },
+                methods: {
+                    getVarDate: function(birthDate) {
+                        birthDate = new Date(birthDate);
+                        hoursDiff = birthDate.getHours() - birthDate.getTimezoneOffset() / 60;
+                        minutesDiff = (birthDate.getHours() - birthDate.getTimezoneOffset()) % 60;
+                        birthDate.setHours(hoursDiff);
+                        birthDate.setMinutes(minutesDiff);
+                        var date = new Date(birthDate).toJSON().slice(0, 10).replace(/-/g, '/');
+                        //var dateOutput = date.getDate + 1 + "." + date.getMonth + "." + date.getFullYear;
+                        return date;
+                    },
+                    
+                    addWishList: function() {
+                        var self = this;
+                        delete self.wishList.id;
+                        axios.post('/api/WishLists/', self.wishList).then(function(response) {
+                            self.wishLists.push(response.data);
+                        });
+                        
+                                                
+                        var el = document.getElementsByClassName('inputView');
+                        for (var i=0;i<el.length; i++) {
+                            el[i].style.display = "none";
+                        }
+
+                        var inputHide = document.getElementsByClassName('inputHide')[0];
+                        inputHide.style.display = "";
+                        
+                    },
+                    
+                    viewAdd: function() {
+                        var self = this;
+                        
+                        var el = document.getElementsByClassName('inputView');
+                        for (var i=0;i<el.length; i++) {
+                            el[i].style.display = "";
+                        }
+
+                        var inputHide = document.getElementsByClassName('inputHide')[0];
+                        inputHide.style.display = "none";
+                        
+                        self.wishList.title = '';
+                        self.wishList.deadline = '';
+                        self.wishList.category = '';
+                        self.wishList.privacy = '';
+                    },
+                    
+                    cancelAdd: function() {
+                        var self = this;
+                        
+                        var el = document.getElementsByClassName('inputView');
+                        for (var i=0;i<el.length; i++) {
+                            el[i].style.display = "none";
+                        }
+
+                        var inputHide = document.getElementsByClassName('inputHide')[0];
+                        inputHide.style.display = "";
+
+                        self.wishList.title = '';
+                        self.wishList.deadline = '';
+                        self.wishList.category = '';
+                        self.wishList.privacy = '';
+                    },
+                    
+                    delWishList: function(id, index) {
+                        var self = this;
+                        
+                        axios.delete('/api/WishLists/' + id)
+                            .then(function(response) {
+                                self.wishLists.splice(index, 1);
+                            });
+                        
+                        var title = document.getElementsByClassName("WishListTitle")[index];
+                        title.getElementsByClassName("edit")[0].style.display = "none";
+                        title.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        var deadline = document.getElementsByClassName("WishListDeadline")[index];
+                        deadline.getElementsByClassName("edit")[0].style.display = "none";
+                        deadline.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        var category = document.getElementsByClassName("WishListCategory")[index];
+                        category.getElementsByClassName("edit")[0].style.display = "none";
+                        category.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        var privacy = document.getElementsByClassName("WishListPrivacy")[index];
+                        privacy.getElementsByClassName("edit")[0].style.display = "none";
+                        privacy.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        var btn1 = document.getElementsByClassName("WishListButton1")[index];
+                        btn1.getElementsByClassName("edit")[0].style.display = "none";
+                        btn1.getElementsByClassName("view")[0].style.display = "block";
+                    },
+                    
+                    visitWishList: function(id) {
+                        window.location.href = '/Product/Prodvue/' + id;
+                    
+                    },
+                    editWishList: function(id, index) {
+                        var title = document.getElementsByClassName("WishListTitle")[index];
+                        title.getElementsByClassName("edit")[0].style.display = "block";
+                        title.getElementsByClassName("view")[0].style.display = "none";
+                        
+                        var deadline = document.getElementsByClassName("WishListDeadline")[index];
+                        deadline.getElementsByClassName("edit")[0].style.display = "block";
+                        deadline.getElementsByClassName("view")[0].style.display = "none";
+                        
+                        var category = document.getElementsByClassName("WishListCategory")[index];
+                        category.getElementsByClassName("edit")[0].style.display = "block";
+                        category.getElementsByClassName("view")[0].style.display = "none";
+                        
+                        var privacy = document.getElementsByClassName("WishListPrivacy")[index];
+                        privacy.getElementsByClassName("edit")[0].style.display = "block";
+                        privacy.getElementsByClassName("view")[0].style.display = "none";
+                        
+                        var btn1 = document.getElementsByClassName("WishListButton1")[index];
+                        btn1.getElementsByClassName("edit")[0].style.display = "block";
+                        btn1.getElementsByClassName("view")[0].style.display = "none";
+                    },
+                    
+                    updateWishList: function(id, index) {
+                        var self = this;
+                        self.wishList.id = id;
+
+                        axios.put('/api/WishLists/' + id, self.wishLists[index]).then(function(response) {
+                            self.wishLists.splice(index, 1, response.data);    
+                            
+                            var title = document.getElementsByClassName("WishListTitle")[index];
+                            title.getElementsByClassName("edit")[0].style.display = "none";
+                            title.getElementsByClassName("view")[0].style.display = "block";
+                        
+                            var deadline = document.getElementsByClassName("WishListDeadline")[index];
+                            deadline.getElementsByClassName("edit")[0].style.display = "none";
+                            deadline.getElementsByClassName("view")[0].style.display = "block";
+                        
+                            var category = document.getElementsByClassName("WishListCategory")[index];
+                            category.getElementsByClassName("edit")[0].style.display = "none";
+                            category.getElementsByClassName("view")[0].style.display = "block";
+                        
+                            var privacy = document.getElementsByClassName("WishListPrivacy")[index];
+                            privacy.getElementsByClassName("edit")[0].style.display = "none";
+                            privacy.getElementsByClassName("view")[0].style.display = "block";
+                        
+                            var btn1 = document.getElementsByClassName("WishListButton1")[index];
+                            btn1.getElementsByClassName("edit")[0].style.display = "none";
+                            btn1.getElementsByClassName("view")[0].style.display = "block";
+                        });
+                    }
+                }
+            });
+        });
+
+    </script>
+}

@@ -1,0 +1,106 @@
+/*vil gjelde alt*/
+
+/*FONTER:*/
+
+*{
+    font-family: "Avenir Next",Abadi MT Condensed Light, san serif;
+    color: #5C5A5A;
+}
+
+
+.p{
+    font-size: 1em;
+}
+
+
+/*index*/
+
+/*email controller*/
+
+input[type=text], select, textarea {
+    width: 60%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+
+/*diverse containere av ulik størrelse; responsive - lg = full bredde, md = medium bredde, sm = liten bredde*/
+
+
+/*carusel*/
+.carousel-inner > .item {
+    position: relative;
+    display: none;
+}
+
+/*cards*/
+.card{
+    background-color: #bfded3;
+}
+
+/*tables*/
+
+th{
+    
+    
+}
+
+tr{
+    background-color: #bfded3;
+}
+
+/*navtab*/
+.tabs{
+    font-size:large;
+}
+
+
+/*Profilbilde*/
+
+#profilbilde{
+    width: 110px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    
+}
+
+#jumboron1{
+    
+    background-image: url("../images/index_photo/index_5.jpg");
+    
+}
+#knnap1{
+   background-color: #d8864c;
+}
+
+
+#knnap2{
+    background-color: #5C5A5A;
+}
+
+#knnap3 {
+    background-color: #5C5A5A;
+}
+
+#textCenter{
+    text-align: center;
+}
+
+.nav-tabs{
+    font-size:large;
+}
+
+.avatar {
+   vertical-align: middle;
+   width: 400px;
+   height: 400px;
+   border-radius: 50%;
+}
+
+.container_bottom {   
+      text-align: center;    
+    
+}

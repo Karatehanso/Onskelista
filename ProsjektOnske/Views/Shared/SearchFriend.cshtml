@@ -1,0 +1,67 @@
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<h3>Legg til en venn</h3>
+
+@model IEnumerable<olist.Models.ApplicationUser>
+
+@{
+    ViewBag.Title = "Index";
+}
+<div style="font-family:Arial">
+  
+    <p>
+        @using (@Html.BeginForm("SearchFriend", "Friendship", FormMethod.Get))
+        {
+            <b>Search By:</b>
+            @Html.RadioButton("searchBy", "FirstName" ) <text>Name</text>
+            @Html.TextBox("search") <input type="submit" value="search" />
+        }
+    </p>
+    <table border="1">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BirthDate)
+            </th>
+            <th>Action</th>
+        </tr>
+        @if (Model.Count() == 0)
+        {
+            <tr>
+                <td colspan="4">
+                    No records match search criteria
+                </td>
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FirstName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LastName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BirthDate)
+                    </td>
+                    <td>
+                        <a asp-controller="Friendship" asp-action="Add" asp-route-id="@item.Id">Legg til venn</a>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+</div>
+

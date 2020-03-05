@@ -1,0 +1,305 @@
+@model olist.Models.WishList
+
+@{
+    ViewBag.Title = @Model.Title +"Products";
+    Layout = "_Layout";
+}
+
+
+<div class=«profiltabber»>
+    <nav class="nav nav-tabs">
+      
+        <a asp-area="" asp-controller="Profile" asp-action="Index" class="nav-item nav-link active">
+            <i class="fa fa-user"></i> Hjem
+        </a>
+      
+        <a asp-area="" asp-controller="Friendship" asp-action="Index" class="nav-item nav-link">
+            <i class="fa fa-users"></i> Venner
+        </a>
+
+        <a asp-area="" asp-controller="Notifikasjon" asp-action="Index" class="nav-item nav-link">
+            <i class="fa fa-bell"></i> Varslinger
+        </a>
+      
+        <a href="#" class="nav-item nav-link disabled" tabindex="-1">
+            <i class="fas fa-shopping-basket"></i>Handlekurv[X]
+        </a>
+      
+    </nav>
+</div>
+
+
+<div class = " jumbotron" id="jumboron1">
+
+
+    <div id="app" v-cloak>
+        <h2 id="textCenter">@Model.Title</h2>
+        <table id="textCenter" class="table table-hover">
+            <thead>
+            <tr>
+                <th>Navn</th>
+                <th>Pris</th>
+                <th>Beskrivelse</th>
+                <th>URL</th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tr v-for="(product, index) in products" v-bind:Id="'list${product.Id}'">
+                
+                <td class="ProductName">
+                    <div class="view">{{product.name}}</div>
+                    <div class="edit" style="display: none">
+                        <input type="text" id="Name" v-model="product.name"/>
+                    </div>
+                </td>
+                
+                <td class="ProductPrice">
+                    <div class="view">{{product.price}}</div>
+                    <div class="edit" style="display: none">
+                        <input type="number" min="0" id="Price" v-model="product.price"/>
+                    </div>
+                </td>
+                
+                <td class="ProductNotes">
+                    <div class="view">{{product.notes}}</div>
+                    <div class="edit" style="display: none">
+                        <input type="text" id="Notes" v-model="product.notes"/>
+                    </div>
+                </td>
+                
+                <td class="ProductUrl">
+                    <div class="view"><a v-bind:href="product.url">{{ product.url }}</a></div>
+                    <div class="edit" style="display: none">
+                        <input type="text" id="Url" v-model="product.url"/>
+                    </div>
+                </td>
+                
+                <td class="ProductButton1">
+                    <div class="view">
+                        <button class="btn btn-info" v-on:click="editProduct(product.id, index)">Endre</button>
+                    </div>
+                    <div class="edit" style="display: none">
+                        <button class="btn btn-info" v-on:click="updateProduct(product.id, index)">Ok</button>
+                    </div>
+                </td>
+                
+                <td class="ProductButton2">
+                    <div class="view">
+                        <button class="btn btn-info" id="knnap1" v-on:click="delProduct(product.id, index)">Fjern</button>
+                    </div>
+                    <div class="edit" style="display: none">
+                        <button class="btn btn-info" id="knnap1" v-on:click="cancelEdit(product.id, index)">Avbryt</button>
+                    </div>
+                </td>
+            </tr>
+            
+            <tr>
+                <td class="inputHide" colspan="6" style="text-align: center">
+                    <button class="btn btn-info" v-on:click="viewAdd()">Legg til Produkt</button>
+                </td>
+            </tr>
+            <tr class="inputView" style="display: none">
+                
+                <td><input type="text" placeholder="Produkt Navn" v-model="product.Name"/></td>
+                <td><input type="number" placeholder="Pris" v-model="product.Price"/></td>
+                <td><input type="text" placeholder="Beskrivelse" v-model="product.Notes"/></td>
+                <td><input type="text" placeholder="URL" v-model="product.Url"/></td>
+                <td><button class="btn btn-info" v-on:click="addProduct">Legg til</button></td>
+                <td><button class="btn btn-info" id="knnap1" v-on:click="cancelAdd">Avbryt</button></td>
+    
+            </tr>
+            
+            
+        </table>
+    
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="https://unpkg.com/axios/dist/axios.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+
+
+    <script>
+        $(document).ready(function() {
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    products: [],
+                    product: {
+                        Name: '',
+                        Price: '',    
+                        Notes: '',
+                        Url: '',
+                        WishListId:''
+                        
+                    }
+                },
+                created: function() {
+                    var self = this;
+                    axios.get('/api/Products/get?WishListId=' + @Model.Id ).then(function(response) {
+                        self.products = response.data;
+                    });
+                },
+                
+                methods: {
+                    addProduct: function() {
+                        var self = this;
+                        self.product.WishListId = @Model.Id;
+                        axios.post('/api/Products/', self.product).then(function(response) {
+                            self.products.push(response.data);
+
+                        });
+                        
+                        var el = document.getElementsByClassName('inputView');
+                        for (var i=0;i<el.length; i++) {
+                            el[i].style.display = "none";
+                        }
+
+                        var inputHide = document.getElementsByClassName('inputHide')[0];
+                        inputHide.style.display = "";
+
+                        
+                    }, 
+                    updateProduct: function(Id, index) {
+                        var self = this;
+                        self.product.WishListId = @Model.Id;
+                        self.product.Id = Id;
+                        
+                        axios.put('/api/Products/' + Id, self.products[index]).then(function(response) {
+                            self.products.splice(index, 1, response.data);
+                            
+                          var Name = document.getElementsByClassName("ProductName")[index];
+                          Name.getElementsByClassName("edit")[0].style.display = "none";
+                          Name.getElementsByClassName("view")[0].style.display = "block";
+                          
+                          var price = document.getElementsByClassName("ProductPrice")[index];
+                          price.getElementsByClassName("edit")[0].style.display = "none";
+                          price.getElementsByClassName("view")[0].style.display = "block";
+                          
+                          var notes = document.getElementsByClassName("ProductNotes")[index];
+                          notes.getElementsByClassName("edit")[0].style.display = "none";
+                          notes.getElementsByClassName("view")[0].style.display = "block";
+                          
+                          var url = document.getElementsByClassName("ProductUrl")[index];
+                          url.getElementsByClassName("edit")[0].style.display = "none";
+                          url.getElementsByClassName("view")[0].style.display = "block";
+                          
+                          var btn1 = document.getElementsByClassName("ProductButton1")[index];
+                          btn1.getElementsByClassName("edit")[0].style.display = "none";
+                          btn1.getElementsByClassName("view")[0].style.display = "block";
+                          
+                          var btn2 = document.getElementsByClassName("ProductButton2")[index];
+                          btn2.getElementsByClassName("edit")[0].style.display = "none";
+                          btn2.getElementsByClassName("view")[0].style.display = "block";                          
+                            
+
+                        });
+                    },
+                    
+                    
+                    delProduct: function(Id, index) {
+                        var self = this;
+                        axios.delete('/api/Products/' + Id).then(function(response) {
+                            self.products.splice(index,1 );
+                        });
+
+                    },
+                    editProduct: function(id, index) {
+                        var Name = document.getElementsByClassName("ProductName")[index];
+                        Name.getElementsByClassName("edit")[0].style.display = "block";
+                        Name.getElementsByClassName("view")[0].style.display = "none";
+                        
+                        var price = document.getElementsByClassName("ProductPrice")[index];
+                        price.getElementsByClassName("edit")[0].style.display = "block";
+                        price.getElementsByClassName("view")[0].style.display = "none";
+                        
+                        var notes = document.getElementsByClassName("ProductNotes")[index];
+                        notes.getElementsByClassName("edit")[0].style.display = "block";
+                        notes.getElementsByClassName("view")[0].style.display = "none";
+                        
+                        var url = document.getElementsByClassName("ProductUrl")[index];
+                        url.getElementsByClassName("edit")[0].style.display = "block";
+                        url.getElementsByClassName("view")[0].style.display = "none";
+                        
+                        var btn1 = document.getElementsByClassName("ProductButton1")[index];
+                        btn1.getElementsByClassName("edit")[0].style.display = "block";
+                        btn1.getElementsByClassName("view")[0].style.display = "none";
+                        
+                        var btn2 = document.getElementsByClassName("ProductButton2")[index];
+                        btn2.getElementsByClassName("edit")[0].style.display = "block";
+                        btn2.getElementsByClassName("view")[0].style.display = "none";
+   
+                        },
+                        cancelEdit: function(id, index){
+                        var Name = document.getElementsByClassName("ProductName")[index];
+                        Name.getElementsByClassName("edit")[0].style.display = "none";
+                        Name.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        var price = document.getElementsByClassName("ProductPrice")[index];
+                        price.getElementsByClassName("edit")[0].style.display = "none";
+                        price.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        var notes = document.getElementsByClassName("ProductNotes")[index];
+                        notes.getElementsByClassName("edit")[0].style.display = "none";
+                        notes.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        var url = document.getElementsByClassName("ProductUrl")[index];
+                        url.getElementsByClassName("edit")[0].style.display = "none";
+                        url.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        var btn1 = document.getElementsByClassName("ProductButton1")[index];
+                        btn1.getElementsByClassName("edit")[0].style.display = "none";
+                        btn1.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        var btn2 = document.getElementsByClassName("ProductButton2")[index];
+                        btn2.getElementsByClassName("edit")[0].style.display = "none";
+                        btn2.getElementsByClassName("view")[0].style.display = "block";
+                        
+                        },
+                        viewAdd: function() {
+                            var self = this;
+                        
+                            var el = document.getElementsByClassName('inputView');
+                            for (var i=0;i<el.length; i++) {
+                                el[i].style.display = "";
+                            }
+
+                            var inputHide = document.getElementsByClassName('inputHide')[0];
+                            inputHide.style.display = "none";
+                        
+                            self.product.Name = '';
+                            self.product.Price = '';
+                            self.product.Notes = '';
+                            self.product.Url = '';
+                            
+                    },
+                    cancelAdd: function() {
+                        var self = this;
+                                            
+                         var el = document.getElementsByClassName('inputView');
+                          for (var i=0;i<el.length; i++) {
+                            el[i].style.display = "none";
+                          }
+                    
+                           var inputHide = document.getElementsByClassName('inputHide')[0];
+                           inputHide.style.display = "";
+                    
+                           self.product.Name = '';
+                           self.product.Price = '';
+                           self.product.Notes = '';
+                           self.product.Url = '';
+                           }
+                           
+                        
+                        
+                   
+
+                }
+                
+        });
+    });
+    </script>
+}
